@@ -1,6 +1,7 @@
 /* @flow */
 
 import replaceTextWithMeta from './lib/replaceTextWithMeta';
+import cssToObject from './lib/cssToObject';
 import {
   CharacterMetadata,
   ContentBlock,
@@ -72,6 +73,7 @@ const DATA_ATTRIBUTE = /^data-([a-z0-9-]+)$/;
 // Map element attributes to entity data.
 const ELEM_ATTR_MAP = {
   a: {href: 'url', rel: 'rel', target: 'target', title: 'title'},
+  span: {style: 'style', title: 'title'},
   img: {src: 'src', alt: 'alt'},
 };
 
@@ -84,7 +86,8 @@ const getEntityData = (tagName: string, element: DOMElement) => {
       if (value != null) {
         if (attrMap.hasOwnProperty(name)) {
           const newName = attrMap[name];
-          data[newName] = value;
+          const newValue = (name === 'style') ? cssToObject(value) : value;
+          data[newName] = newValue;
         } else if (DATA_ATTRIBUTE.test(name)) {
           data[name] = value;
         }
@@ -101,6 +104,13 @@ const ELEM_TO_ENTITY = {
     // Don't add `<a>` elements with no href.
     if (data.url != null) {
       return Entity.create(ENTITY_TYPE.LINK, 'MUTABLE', data);
+    }
+  },
+  span(tagName: string, element: DOMElement): ?string {
+    let data = getEntityData(tagName, element);
+    // Don't add `<span>` elements with no style.
+    if (data.style != null) {
+      return Entity.create('SPAN_STYLES', 'MUTABLE', data);
     }
   },
   img(tagName: string, element: DOMElement): ?string {
