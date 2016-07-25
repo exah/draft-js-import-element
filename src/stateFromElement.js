@@ -114,7 +114,7 @@ const ELEM_TO_ENTITY = {
     let data = getEntityData(tagName, element);
     // Don't add `<span>` elements with no style.
     if (data.style != null) {
-      return Entity.create('SPAN_STYLES', 'MUTABLE', data);
+      return Entity.create('INLINE_STYLES', 'MUTABLE', data);
     }
   },
   img(tagName: string, element: DOMElement): ?string {
@@ -468,9 +468,15 @@ function addStyleFromTagName(styleSet: StyleSet, tagName: string, elementStyles?
 
 function addStyleFromStyleAttribute(styleSet: StyleSet, styleAttributeValue: string, customCssMapToStyle: CustomCssMapToStyle): StyleSet {
   // Allow custom css styles to be provided
-  if (Object.keys(customCssMapToStyle).indexOf(styleAttributeValue) >= 0) {
-    return styleSet.add(customCssMapToStyle[styleAttributeValue]);
-  }
+  const stylesMapKeys = Object.keys(customCssMapToStyle);
+
+  styleSet = stylesMapKeys.reduce((prevStyleSet, cssRule) => {
+    if (styleAttributeValue.indexOf(cssRule) >= 0) {
+      return prevStyleSet.add(customCssMapToStyle[cssRule]);
+    }
+
+    return prevStyleSet;
+  }, styleSet);
 
   return styleSet;
 }
