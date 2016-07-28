@@ -66,7 +66,7 @@ const EMPTY_BLOCK = new ContentBlock({
   depth: 0,
 });
 
-const LINE_BREAKS = /(\r\n|\r|\n)/g;
+const LINE_BREAKS = /(\r\n|\r|\n|<br\s?\/?>)/g;
 // We use `\r` because that character is always stripped from source (normalized
 // to `\n`), so it's safe to assume it will only appear in the text content when
 // we put it there as a placeholder.
@@ -77,7 +77,7 @@ const DATA_ATTRIBUTE = /^data-([a-z0-9-]+)$/;
 // Map element attributes to entity data.
 const ELEM_ATTR_MAP = {
   a: {href: 'url', rel: 'rel', target: 'target', title: 'title'},
-  span: {style: 'style', title: 'title'},
+  // span: {style: 'style', title: 'title'},
   img: {src: 'src', alt: 'alt'},
 };
 
@@ -110,13 +110,13 @@ const ELEM_TO_ENTITY = {
       return Entity.create(ENTITY_TYPE.LINK, 'MUTABLE', data);
     }
   },
-  span(tagName: string, element: DOMElement): ?string {
-    let data = getEntityData(tagName, element);
-    // Don't add `<span>` elements with no style.
-    if (data.style != null) {
-      return Entity.create('INLINE_STYLES', 'MUTABLE', data);
-    }
-  },
+  // span(tagName: string, element: DOMElement): ?string {
+  //   let data = getEntityData(tagName, element);
+  //   // Don't add `<span>` elements with no style.
+  //   if (data.style != null) {
+  //     return Entity.create('INLINE_STYLES', 'MUTABLE', data);
+  //   }
+  // },
   img(tagName: string, element: DOMElement): ?string {
     let data = getEntityData(tagName, element);
     // Don't add `<img>` elements with no src.
